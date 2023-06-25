@@ -1,29 +1,39 @@
 <head>
-    <title>
-        TODO app
-    </title>
+  <title>TODO app</title>
 </head>
-<script>
+<body>
+  <script>
     function parsedResponse(data) {
-        console.log(data);
+      console.log(data);
     }
 
     function callback(resp) {
-        resp.json().then(parsedResponse);
+      resp.json().then(parsedResponse);
     }
 
     function onPress() {
-        fetch("http://localhost:3000/todos", {
-            method: "GET"
-        }).then(callback)
+      var title = document.getElementById("title").value;
+      var description = document.getElementById("description").value;
+
+      var todo = {
+        title: title,
+        description: description,
+      };
+      fetch("http://localhost:3000/todos", {
+        method: "POST",
+        body: JSON.stringify(todo),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }).then(callback);
     }
-</script>
-<body>
-    <h1>Todo title</h1>
-    <input type="text" id="title"></input>
-    <br><br>
-    <h3>Todo description</h3>
-    <input type="text" id="title"></input>
-    <br><br>
-    <button onclick="onPress()">send todo</button>
+  </script>
+  <hr />
+  <h1>Todo title</h1>
+  <input type="text" id="title" />
+  <h2>Todo description</h2>
+  <input type="text" id="description" />
+  <br />
+  <button onclick="onPress()">send todo</button>
+  <hr />
 </body>
