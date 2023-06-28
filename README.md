@@ -1,7 +1,7 @@
 # Todo App
 ## Full Stack Todos
 A simple **ToDo** App.
-Where u can **add todos and delete** todos :)
+Where u can **add todos and delete todos** :)
 ### Screen-Shots 01
 ![ghtodo1](https://github.com/adityadeshlahre/Week-3-Daily-Todos/assets/132184385/ef26e48d-c7d1-4860-804d-c426f68adadf)
 ### Screen-Shots 02
