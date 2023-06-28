@@ -1,39 +1,180 @@
-<head>
-  <title>TODO app</title>
-</head>
-<body>
-  <script>
-    function parsedResponse(data) {
-      console.log(data);
-    }
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Todo App</title>
+    <style>
+      body {
+        background-color: #e0e5ec;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
 
-    function callback(resp) {
-      resp.json().then(parsedResponse);
-    }
+      .container {
+        text-align: center;
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        border: 2px solid #ffffff;
+        border-radius: 5px;
+      }
 
-    function onPress() {
-      var title = document.getElementById("title").value;
-      var description = document.getElementById("description").value;
+      .todo-input {
+        display: flex;
+        margin-bottom: 10px;
+      }
 
-      var todo = {
-        title: title,
-        description: description,
+      .todo-input input[type="text"] {
+        flex: 1;
+        display: flex;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        outline: none;
+      }
+
+      .todo-input button {
+        padding: 8px 12px;
+        margin-left: 10px;
+        background-color: purple;
+        color: #fff;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+
+      .todo-list {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      .todo-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px;
+        margin-bottom: 10px;
+        background-color: #f0f4f8;
+        border-radius: 3px;
+      }
+
+      .todo-item button {
+        padding: 5px 10px;
+        background-color: purple;
+        color: #fff;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+    </style>
+    <script>
+      // Function to handle form submission
+      const handleSubmit = (submit) => {
+        submit.preventDefault(); // Prevents the form from being submitted
+
+        // Get the values entered in the title and description fields
+        var title = document.getElementById("title").value;
+        var description = document.getElementById("description").value;
+
+        if (title.trim() === "" || description.trim() === "") {
+          // Display an error message or take appropriate action
+          alert("Please fill in all the fields");
+          return;
+        }
+        // Send a request to create a new todo item
+        // The todo data is sent as JSON in the request body
+        fetch("http://localhost:3000/todos", {
+          method: "POST",
+          body: JSON.stringify({
+            title: title,
+            description: description,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then(function (response) {
+            return response.json();
+          })
+          .then(function (data) {
+            console.log(data); // Log the response data to the console
+            getTodos();
+          });
+
+        // Clear the input fields after submission
+        document.getElementById("title").value = "";
+        document.getElementById("description").value = "";
       };
-      fetch("http://localhost:3000/todos", {
-        method: "POST",
-        body: JSON.stringify(todo),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }).then(callback);
-    }
-  </script>
-  <hr />
-  <h1>Todo title</h1>
-  <input type="text" id="title" />
-  <h2>Todo description</h2>
-  <input type="text" id="description" />
-  <br />
-  <button onclick="onPress()">send todo</button>
-  <hr />
-</body>
+
+      // Function to handle todo deletion
+      const deleteTodo = (id) => {
+        // Send a request to delete the specific todo item
+        fetch(`http://localhost:3000/todos/${id}`, {
+          method: "DELETE",
+        }).then(function (response) {
+          if (response.ok) {
+            console.log("Todo deleted");
+            // Fetch and update the todos list
+            getTodos();
+          } else {
+            console.log("Failed to delete todo");
+          }
+        });
+      };
+
+      // Function to fetch and display the todos
+      function getTodos() {
+        // Fetch the list of todos
+        fetch("http://localhost:3000/todos")
+          .then(function (response) {
+            return response.json();
+          })
+          .then(function (data) {
+            console.log(data); // Log the fetched data to the console
+            // Clear the existing todos container
+            const todosContainer = document.getElementById("todos-container");
+            todosContainer.innerHTML = "";
+
+            // Iterate through todos and create list items
+            data.forEach(function (todo) {
+              const li = document.createElement("li");
+              li.classList.add("todo-item");
+
+              const titleElement = document.createElement("h2");
+              titleElement.textContent = todo.title;
+
+              const descriptionElement = document.createElement("p");
+              descriptionElement.textContent = todo.description;
+
+              const deleteButton = document.createElement("button");
+              deleteButton.textContent = "Delete";
+              deleteButton.addEventListener("click", function () {
+                deleteTodo(todo.id);
+              });
+
+              li.appendChild(titleElement);
+              li.appendChild(descriptionElement);
+              li.appendChild(deleteButton);
+
+              todosContainer.appendChild(li);
+            });
+          });
+      }
+      getTodos();
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>ToDo App 📝</h1>
+    </div>
+    <div class="container">
+      <form class="todo-input" onsubmit="handleSubmit(event)">
+        <input type="text" id="title" placeholder="Enter Todo" />
+        <input type="text" id="description" placeholder="Enter description" />
+        <button type="submit">Add</button>
+      </form>
+      <ul class="todo-list" id="todos-container"></ul>
+    </div>
+  </body>
+</html>

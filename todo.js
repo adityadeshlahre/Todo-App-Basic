@@ -8,7 +8,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // let todos = [];
-var idCount = 1;
+// var idCount = 1;
 
 function findIndex(arr, id) {
   for (let i = 0; i < arr.length; i++) {
@@ -47,7 +47,8 @@ app.get("/todos/:id", (req, res) => {
 
 app.post("/todos", (req, res) => {
   const newTodo = {
-    id: idCount,
+    id: Math.floor(Math.random() * 1000000),
+    // id: idCount,
     title: req.body.title,
     description: req.body.description,
   };
@@ -60,7 +61,7 @@ app.post("/todos", (req, res) => {
       res.status(201).json(newTodo);
     });
   });
-  idCount += 1;
+  // idCount += 1;
 });
 
 app.put("/todos/:id", (req, res) => {
@@ -86,19 +87,22 @@ app.put("/todos/:id", (req, res) => {
 });
 
 app.delete("/todos/:id", (req, res) => {
-  const todos = req.params.id;
+  // const todos = req.params.id;
   fs.readFile("todo.json", "utf8", (err, data) => {
     if (err) throw err;
-    const todoIndex = JSON.parse(data);
-    if (todos >= todoIndex.length) {
-      throw err;
+    let todos = JSON.parse(data);
+    const todoIndex = findIndex(todos, parseInt(req.params.id));
+    if (todoIndex === -1) {
+      res.status(404).send();
     }
-    todoIndex.splice(todos, 1);
-    const updatedTodos = JSON.stringify(todoIndex);
-    fs.writeFile("todo.json", updatedTodos, "utf-8", (err, output) => {
-      if (err) throw err;
-      res.status(200).send(`Data removed from Index ${todos}`);
-    });
+    // todoIndex.splice(todos, 1);
+    else {
+      todos = removeAtIndex(todos, todoIndex);
+      fs.writeFile("todo.json", JSON.stringify(todos), (err) => {
+        if (err) throw err;
+        res.status(200).send(`Deleted ToDo of Index ${todos}`);
+      });
+    }
   });
 });
 
@@ -107,8 +111,8 @@ app.get("/", (req, res) => {
 });
 
 // for all other routes, return 404
-// app.use((req, res, next) => {
-//   res.status(404).send();
-// });
+app.use((req, res, next) => {
+  res.status(404).send();
+});
 
 app.listen(3000);
